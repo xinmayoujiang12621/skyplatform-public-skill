@@ -1,13 +1,7 @@
 ---
 name: wiki-assistant
-description: Read, search, and upload technical documents to the SkyPlatform Wiki. Use when the user's task involves checking, creating, or updating internal documentation (SSO integration guides, component specs, deployment procedures, etc.).
-triggers:
-  - "check the wiki"
-  - "look up in the wiki"
-  - "search wiki for"
-  - "read the wiki article"
-  - "is there documentation for"
-  - "upload to wiki"
+description: "搜索、阅读和上传技术文档到 SkyPlatform Wiki。支持关键词搜索、全文阅读、Frontmatter 格式上传。"
+trigger: /wiki-assistant
   - "create wiki article"
   - "update wiki article"
   - "add to wiki"
