@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T03:16:44.240Z",
+  "generatedAt": "2026-05-13T03:38:59.969Z",
   "skills": [
     {
       "name": "graphify",
@@ -11,29 +11,49 @@
       "body": "# /graphify\n\n将任意文件夹转换为可导航的知识图谱，支持社区检测、审计追踪和三种输出格式：交互式 HTML、GraphRAG JSON 和 GRAPH_REPORT.md。\n\n## Usage\n\n```bash\n/graphify                                             # 当前目录完整流程\n/graphify <path>                                      # 指定路径\n/graphify <path> --mode deep                          # 深度提取\n/graphify <path> --update                             # 增量更新\n/graphify <path> --wiki                               # 构建 agent 可爬取的 wiki\n```\n\n## What graphify is for\n\n三件 AI 助手单独做不到的事：\n\n1. **持久化图谱** — 关系存储在 `graphify-out/graph.json`，跨会话保留\n2. **诚实审计** — 每条边标记 EXTRACTED / INFERRED / AMBIGUOUS\n3. **跨文档发现** — 社区检测发现不同文件间的隐藏关联\n",
       "files": [
         {
+          "name": ".graphify_version",
+          "path": "skills/graphify/.graphify_version",
+          "type": "file"
+        },
+        {
           "name": "SKILL.md",
           "path": "skills/graphify/SKILL.md",
           "type": "file"
         }
       ],
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "name": "wiki-assistant",
       "meta": {
         "name": "wiki-assistant",
-        "description": "搜索、阅读和上传技术文档到 SkyPlatform Wiki。支持关键词搜索、全文阅读、Frontmatter 格式上传。",
-        "trigger": "/wiki-assistant"
+        "description": "Read, search, and upload technical documents to the SkyPlatform Wiki. Use when the user's task involves checking, creating, or updating internal documentation (SSO integration guides, component specs, deployment procedures, etc.).",
+        "triggers": ""
       },
-      "body": "# SkyPlatform Wiki Assistant\n\n搜索、阅读和上传技术文档到 SkyPlatform Wiki。\n\n## Quick Reference\n\n所有操作通过 `wiki.py` 脚本完成，无需手动 curl。\n\n```bash\n# 定位脚本（每会话执行一次）\nWIKI_PY=$(find ~/.claude/skills -path \"*/wiki-assistant/wiki.py\" 2>/dev/null | head -1)\n```\n\n## 搜索文档\n\n```bash\npython \"$WIKI_PY\" search \"<关键词>\"\n```\n\n## 阅读文档\n\n```bash\npython \"$WIKI_PY\" read <slug>\n```\n\n## 上传文档\n\n```bash\npython \"$WIKI_PY\" upload <file.md>\n```\n\n上传文件需使用 YAML Frontmatter 格式：\n\n```\n---\ntitle: 文档标题\nslug: document-slug\ncategory: 分类名称\ntags: tag1,tag2\nagent_summary: |\n  供 AI 快速理解的结构化摘要\n---\n\nMarkdown 正文...\n```\n",
+      "body": "# SkyPlatform Wiki\n\nSearch, read, and manage technical documents on the SkyPlatform Wiki.\n\n## Quick Reference\n\nAll operations go through `wiki.py` (located alongside this skill file). One command per action, no curl needed.\n\n```bash\n# Locate the script (do this once per session)\nWIKI_PY=$(find ~/.claude/skills -path \"*/wiki-assistant/wiki.py\" 2>/dev/null | head -1)\n```\n\n---\n\n## Reading\n\n### Search articles\n\n```bash\npython \"$WIKI_PY\" search \"<KEYWORD>\"\n```\n\nTry multiple keywords if the first returns nothing. Broad first, then narrow.\n\n### Read full article\n\n```bash\npython \"$WIKI_PY\" read \"<SLUG>\"\n```\n\nThe `content` field is full Markdown.\n\n### Read agent summary (recommended for AI agents)\n\n```bash\npython \"$WIKI_PY\" brief \"<SLUG>\"\n```\n\nReturns only the structured `agent_summary` — a concise, machine-oriented digest of what the article covers, how to integrate, and what to change. **Always try `brief` first** before reading the full article. If the article has no summary, fall back to `read`.\n\n### Browse category tree\n\n```bash\npython \"$WIKI_PY\" categories\n```\n\n### List all articles\n\n```bash\npython \"$WIKI_PY\" list\n```\n\n---\n\n## Writing\n\n### Upload / Upsert an article (Recommended)\n\nThis is the preferred way to create or update articles. Write a Markdown file with YAML frontmatter — the server creates the article if the slug doesn't exist, or updates it if it does. Authentication is handled automatically via the permanent token in config.\n\n**Step 1:** Write the markdown file locally.\n\n**Frontmatter format:**\n\n```markdown\n---\ntitle: Article Title\nslug: url-slug\ncategory: Category Name\ntags: tag1, tag2\n---\n\n# Article content starts here\n\nMarkdown body...\n```\n\n**Frontmatter fields:**\n- `title` (required) — article title\n- `slug` (required) — unique URL slug\n- `category` (optional) — category name; auto-created if not found\n- `tags` (optional) — comma-separated string or YAML list\n- `agent_summary` (optional) — structured summary for AI agents (multi-line YAML string)\n\n**agent_summary recommended template:**\n\n```yaml\nagent_summary: |\n  ## Overview\n  One-line description of what this service/component does.\n\n  ## Integration Steps\n  1. Step one\n  2. Step two\n\n  ## Required Configuration\n  - ENV_VAR: description\n\n  ## Key Interfaces\n  - METHOD /path — description\n```\n\nThis summary is optimized for AI agents to quickly understand the integration approach without reading the full human-oriented article.\n\n**Step 2:** Upload it.\n\n```bash\npython \"$WIKI_PY\" upload path/to/document.md\n```\n\nOne command. No token management, no JSON escaping.\n\n---\n\n## Configuration\n\n`config.json` sits alongside `wiki.py`. Use a permanent API token — no login needed on each call.\n\n```json\n{\n  \"api_url\": \"http://localhost:8000\",\n  \"token\": \"<your-permanent-api-token>\"\n}\n```\n\n**How to get a permanent token:**\n\n1. Login to the wiki admin panel\n2. Call `POST /api/auth/api-token` with your admin JWT to get a 10-year token\n3. Paste it into `config.json` as `\"token\"`\n\nOr from command line:\n```bash\n# Login first\nJWT=$(curl -s -X POST \"http://localhost:8000/api/auth/login\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"username\":\"admin\",\"password\":\"changeme\"}' | python -c \"import sys,json; print(json.load(sys.stdin)['access_token'])\")\n\n# Get permanent token\ncurl -s -X POST \"http://localhost:8000/api/auth/api-token\" \\\n  -H \"Authorization: Bearer $JWT\" | python -c \"import sys,json; print(json.load(sys.stdin)['access_token'])\"\n```\n\nIf you get auth errors, ask the user to check `config.json`.\n\n---\n\n## When to use this skill\n\n**Reading:**\n- **Always try `brief` first** when you need to understand how to integrate with a service — it returns a concise, structured summary\n- If `brief` returns \"未设置 Agent 摘要\", fall back to `read` for the full article\n- Before implementing an integration — check if a guide exists\n- When the user mentions a technology with possible internal docs\n- When looking for deployment procedures or environment configs\n\n**Writing:**\n- When the user asks to save/publish documentation to the wiki\n- When completing a task that should be documented for future reference\n- When the user says \"add this to the wiki\" or \"create a wiki article\"\n\n## Encoding Rules\n\n**All operations MUST use UTF-8 encoding.** This is non-negotiable:\n\n- **Writing files**: When generating the markdown file to upload, always write with UTF-8 encoding. In Python: `open(path, 'w', encoding='utf-8')`. Never use the system default encoding.\n- **Reading files**: Always read with UTF-8. In Python: `open(path, 'r', encoding='utf-8')`.\n- **Running the script**: `wiki.py` handles UTF-8 internally. Do not pipe through tools that may re-encode output.\n- **Bash heredocs / printf**: Avoid using bash to write file content directly — the shell encoding is unreliable on Windows. Write content via Python instead:\n  ```python\n  from pathlib import Path\n  Path(\"doc.md\").write_text(content, encoding=\"utf-8\")\n  ```\n\nIf uploaded content shows garbled Chinese characters, the file was not written in UTF-8.\n\n---\n\n## Guidelines\n\n- Always search before assuming no documentation exists\n- When creating articles, use descriptive slugs (e.g. `sso-integration-guide`)\n- Pick an existing category when possible; browse the tree first\n- Present wiki content as reference material, not absolute instructions\n- If wiki content conflicts with user requirements, ask the user which to follow\n\n## Core Principle: Agent Summary First\n\nWiki articles are written for humans — they contain context, explanations, and examples. When an AI agent needs to understand a service's integration approach, reading the full article is inefficient. The `agent_summary` field solves this:\n\n**Reading: `brief` before `read`.**\n\n1. Search to find the relevant article slug\n2. **Always call `brief <slug>` first** — it returns only the structured summary\n3. If the article has an `agent_summary`, you get the integration steps, config, and key interfaces immediately — no need to read the full article\n4. Only call `read <slug>` when the summary is missing or you need implementation details\n\n**Writing: always include `agent_summary`.**\n\nWhen uploading an article, **always include an `agent_summary` in the frontmatter**, even if the article content is long. This ensures future agents can quickly consume the document. Use the recommended template:\n\n```yaml\nagent_summary: |\n  ## Overview\n  One-line description of what this service/component does.\n  ## Integration Steps\n  1. Step one\n  2. Step two\n  ## Required Configuration\n  - ENV_VAR: description\n  ## Key Interfaces\n  - METHOD /path — description\n```\n\nThe summary should be **concise and actionable** — focus on what another agent needs to do, not why. Skip background, context, and explanations. Just the steps, config, and interfaces.\n",
       "files": [
+        {
+          "name": "config.json",
+          "path": "skills/wiki-assistant/config.json",
+          "type": "file"
+        },
+        {
+          "name": "README.md",
+          "path": "skills/wiki-assistant/README.md",
+          "type": "file"
+        },
         {
           "name": "SKILL.md",
           "path": "skills/wiki-assistant/SKILL.md",
           "type": "file"
+        },
+        {
+          "name": "wiki.py",
+          "path": "skills/wiki-assistant/wiki.py",
+          "type": "file"
         }
       ],
-      "fileCount": 1
+      "fileCount": 4
     }
   ]
 }
