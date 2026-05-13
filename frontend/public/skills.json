@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-05-13T03:16:44.240Z",
+  "skills": [
+    {
+      "name": "graphify",
+      "meta": {
+        "name": "graphify",
+        "description": "将代码、文档、论文转为可导航的知识图谱。支持社区检测、HTML 可视化、GraphRAG JSON 输出。",
+        "trigger": "/graphify"
+      },
+      "body": "# /graphify\n\n将任意文件夹转换为可导航的知识图谱，支持社区检测、审计追踪和三种输出格式：交互式 HTML、GraphRAG JSON 和 GRAPH_REPORT.md。\n\n## Usage\n\n```bash\n/graphify                                             # 当前目录完整流程\n/graphify <path>                                      # 指定路径\n/graphify <path> --mode deep                          # 深度提取\n/graphify <path> --update                             # 增量更新\n/graphify <path> --wiki                               # 构建 agent 可爬取的 wiki\n```\n\n## What graphify is for\n\n三件 AI 助手单独做不到的事：\n\n1. **持久化图谱** — 关系存储在 `graphify-out/graph.json`，跨会话保留\n2. **诚实审计** — 每条边标记 EXTRACTED / INFERRED / AMBIGUOUS\n3. **跨文档发现** — 社区检测发现不同文件间的隐藏关联\n",
+      "files": [
+        {
+          "name": "SKILL.md",
+          "path": "skills/graphify/SKILL.md",
+          "type": "file"
+        }
+      ],
+      "fileCount": 1
+    },
+    {
+      "name": "wiki-assistant",
+      "meta": {
+        "name": "wiki-assistant",
+        "description": "搜索、阅读和上传技术文档到 SkyPlatform Wiki。支持关键词搜索、全文阅读、Frontmatter 格式上传。",
+        "trigger": "/wiki-assistant"
+      },
+      "body": "# SkyPlatform Wiki Assistant\n\n搜索、阅读和上传技术文档到 SkyPlatform Wiki。\n\n## Quick Reference\n\n所有操作通过 `wiki.py` 脚本完成，无需手动 curl。\n\n```bash\n# 定位脚本（每会话执行一次）\nWIKI_PY=$(find ~/.claude/skills -path \"*/wiki-assistant/wiki.py\" 2>/dev/null | head -1)\n```\n\n## 搜索文档\n\n```bash\npython \"$WIKI_PY\" search \"<关键词>\"\n```\n\n## 阅读文档\n\n```bash\npython \"$WIKI_PY\" read <slug>\n```\n\n## 上传文档\n\n```bash\npython \"$WIKI_PY\" upload <file.md>\n```\n\n上传文件需使用 YAML Frontmatter 格式：\n\n```\n---\ntitle: 文档标题\nslug: document-slug\ncategory: 分类名称\ntags: tag1,tag2\nagent_summary: |\n  供 AI 快速理解的结构化摘要\n---\n\nMarkdown 正文...\n```\n",
+      "files": [
+        {
+          "name": "SKILL.md",
+          "path": "skills/wiki-assistant/SKILL.md",
+          "type": "file"
+        }
+      ],
+      "fileCount": 1
+    }
+  ]
+}
