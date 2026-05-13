@@ -257,7 +257,7 @@ export default function App() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    fetch("/skills.json")
+    fetch(import.meta.env.BASE_URL + "skills.json")
       .then((r) => {
         if (!r.ok) throw new Error("加载 Skill 清单失败");
         return r.json();
